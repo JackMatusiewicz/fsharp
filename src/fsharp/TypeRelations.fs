@@ -144,33 +144,33 @@ let ChooseTyparSolutionAndRange (g: TcGlobals) amap (tp:Typar) =
                 | TyparConstraint.CoercesTo(x,m) -> 
                     join m x typeWasRefined,m
                 | TyparConstraint.MayResolveMember(TTrait(_,_,_,_,_,_),m) ->
-                    (maxSoFar,false),m
+                    (maxSoFar,typeWasRefined),m
                 | TyparConstraint.SimpleChoice(_,m) -> 
                     errorR(Error(FSComp.SR.typrelCannotResolveAmbiguityInPrintf(),m))
-                    (maxSoFar,false),m
+                    (maxSoFar,typeWasRefined),m
                 | TyparConstraint.SupportsNull m -> 
-                    (maxSoFar,false),m
+                    (maxSoFar,typeWasRefined),m
                 | TyparConstraint.SupportsComparison m -> 
                     join m g.mk_IComparable_ty typeWasRefined,m
                 | TyparConstraint.SupportsEquality m -> 
-                    (maxSoFar,false),m
+                    (maxSoFar,typeWasRefined),m
                 | TyparConstraint.IsEnum(_,m) -> 
                     errorR(Error(FSComp.SR.typrelCannotResolveAmbiguityInEnum(),m))
-                    (maxSoFar,false),m
+                    (maxSoFar,typeWasRefined),m
                 | TyparConstraint.IsDelegate(_,_,m) -> 
                     errorR(Error(FSComp.SR.typrelCannotResolveAmbiguityInDelegate(),m))
-                    (maxSoFar,false),m
+                    (maxSoFar,typeWasRefined),m
                 | TyparConstraint.IsNonNullableStruct m -> 
                     join m g.int_ty typeWasRefined,m
                 | TyparConstraint.IsUnmanaged m ->
                     errorR(Error(FSComp.SR.typrelCannotResolveAmbiguityInUnmanaged(),m))
-                    (maxSoFar,false),m
+                    (maxSoFar,typeWasRefined),m
                 | TyparConstraint.RequiresDefaultConstructor m -> 
-                    (maxSoFar,false),m
+                    (maxSoFar,typeWasRefined),m
                 | TyparConstraint.IsReferenceType m -> 
-                    (maxSoFar,false),m
+                    (maxSoFar,typeWasRefined),m
                 | TyparConstraint.DefaultsTo(_priority,_ty,m) -> 
-                    (maxSoFar,false),m
+                    (maxSoFar,typeWasRefined),m
                 |> fun ((max,didRefineThisStep),m) -> max,m,(didRefineThisStep && typeWasRefined))
          if tp.Kind = TyparKind.Type && typeWasRefined = false then
              // patricks: we inferred obj because we had nothing left to infer.

@@ -171,7 +171,7 @@ let ChooseTyparSolutionAndRange (g: TcGlobals) amap (tp:Typar) =
                     (maxSoFar,typeWasRefined),m
                 | TyparConstraint.DefaultsTo(_priority,_ty,m) -> 
                     (maxSoFar,typeWasRefined),m
-                |> fun ((max,didRefineThisStep),m) -> max,m,(didRefineThisStep && typeWasRefined))
+                |> fun ((max,didRefineThisStep),m) -> max,m,(didRefineThisStep || typeWasRefined))
          if tp.Kind = TyparKind.Type && typeWasRefined = false then
              // patricks: we inferred obj because we had nothing left to infer.
              // Warn.

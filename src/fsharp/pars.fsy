@@ -3636,6 +3636,9 @@ atomicExpr:
   | GLOBAL
       { SynExpr.Ident (ident(MangledGlobalName,rhs parseState 1)), false }
 
+  | UNDERSCORE
+      { SynExpr.Ident (ident(MangledUnderscoreName,rhs parseState 1)), false }
+
   | nameop
       { SynExpr.Ident ($1),false }
 

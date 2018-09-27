@@ -572,6 +572,8 @@ module public Microsoft.FSharp.Compiler.PrettyNaming
     let [<Literal>] FSharpModuleSuffix = "Module"
 
     let [<Literal>] MangledGlobalName = "`global`"
+
+    let [<Literal>] MangledUnderscoreName = "`underscore`"
     
     let IllegalCharactersInTypeAndNamespaceNames = [| '.'; '+'; '$'; '&'; '['; ']'; '/'; '\\'; '*'; '\"'; '`'  |]
 

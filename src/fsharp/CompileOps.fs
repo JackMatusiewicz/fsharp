@@ -363,7 +363,7 @@ let GetDiagnosticNumber(err:PhasedDiagnostic) =
       | WrappedError(e, _) -> GetFromException e   
 
       | Error ((n, _), _) -> n
-      | ErrorWithSuggestions ((n, _), _, _, _) -> n  
+      | ErrorWithSuggestions ((n, _), _, _, _) -> n
       | Failure _ -> 192
       | NumberedError((n, _), _) -> n
       | IllegalFileNameChar(fileName, invalidChar) -> fst (FSComp.SR.buildUnexpectedFileNameCharacter(fileName, string invalidChar))

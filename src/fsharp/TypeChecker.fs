@@ -8515,7 +8515,7 @@ and TcFunctionApplicationThen cenv overallTy env tpenv mExprAndArg expr exprty (
 and TcLongIdentThen cenv overallTy env tpenv (LongIdentWithDots(longId, m)) delayed =
     let initialId = longId.[0]
     
-    if initialId.idText = MangledUnderscoreName then
+    if initialId.idText = MangledUnderscoreName && longId.Length > 1 then
         let newIdent : Ident = Ident("`lambdaVar`", initialId.idRange)
         let appendDelayedItem (acc : SynExpr) = function
             | DelayedItem.DelayedApp(atomic, expr, m) -> SynExpr.App(atomic, false, acc, expr, m)

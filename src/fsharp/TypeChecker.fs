@@ -8517,26 +8517,54 @@ and TcLongIdentThen cenv overallTy env tpenv (LongIdentWithDots(longId, m)) dela
     
     if initialId.idText = MangledUnderscoreName && longId.Length > 1 then
         let newIdent : Ident = Ident("`lambdaVar`", initialId.idRange)
-        let appendDelayedItem (acc : SynExpr) = function
-            | DelayedItem.DelayedApp(atomic, expr, m) ->
-                if atomic = ExprAtomicFlag.Atomic then
+        let constructLambda (acc : SynExpr) items : SynExpr * DelayedItem list =
+            let rec appendDelayedItem (acc : SynExpr) items : SynExpr * DelayedItem list =
+                match items with
+                | [] -> acc, []
+                | head :: tail ->
+                    let recurse newAcc = appendDelayedItem newAcc tail
+                    match head with
+                    | DelayedItem.DelayedApp(atomic, expr, m) ->
+                        if atomic = ExprAtomicFlag.Atomic then
+                            SynExpr.App(atomic, false, acc, expr, m)
+                            |> recurse
+                        else
+                            acc, items
+                    | DelayedItem.DelayedDot ->
+                        SynExpr.DiscardAfterMissingQualificationAfterDot(acc, m.[0]) // Range definitely wrong
+                        |> recurse
+                    | DelayedItem.DelayedDotLookup(ids, m) ->
+                        let ms = ids |> List.map (fun o -> o.idRange)
+                        SynExpr.DotGet(acc, m, LongIdentWithDots(ids, ms), m (*wrong*))
+                        |> recurse
+                    | DelayedItem.DelayedSet _ -> failwith ""
+                    | DelayedItem.DelayedTypeApp _ -> failwith "You're a moron, Toby"
+            let body, remaining = appendDelayedItem acc items
+            let lambdaVarRange = initialId.idRange
+            let pats = SynSimplePats.SimplePats([SynSimplePat.Id (newIdent, None, true, true, false, lambdaVarRange)], lambdaVarRange)
+            SynExpr.Lambda(false, false, pats, body, m.[0] (*Really wrong*)), remaining
+        let rec appendDelayedItem2 (acc : SynExpr) items : SynExpr =
+            match items with
+            | [] -> acc
+            | head :: tail ->
+                let recurse newAcc = appendDelayedItem2 newAcc tail
+                match head with
+                | DelayedItem.DelayedApp(atomic, expr, m) ->
                     SynExpr.App(atomic, false, acc, expr, m)
-                else
-                    failwith ""
-            | DelayedItem.DelayedDot -> SynExpr.DiscardAfterMissingQualificationAfterDot(acc, m.[0]) // Range definitely wrong
-            | DelayedItem.DelayedDotLookup(ids, m) ->
-                let ms = ids |> List.map (fun o -> o.idRange)
-                SynExpr.DotGet(acc, m, LongIdentWithDots(ids, ms), m (*wrong*))
-            | DelayedItem.DelayedSet _ -> failwith ""
-            | DelayedItem.DelayedTypeApp _ -> failwith "You're a moron, Toby"
-
+                    |> recurse
+                | DelayedItem.DelayedDot ->
+                    SynExpr.DiscardAfterMissingQualificationAfterDot(acc, m.[0]) // Range definitely wrong
+                    |> recurse
+                | DelayedItem.DelayedDotLookup(ids, m) ->
+                    let ms = ids |> List.map (fun o -> o.idRange)
+                    SynExpr.DotGet(acc, m, LongIdentWithDots(ids, ms), m (*wrong*))
+                    |> recurse
+                | DelayedItem.DelayedSet _ -> failwith ""
+                | DelayedItem.DelayedTypeApp _ -> failwith "You're a moron, Toby"
                 
         let initialExpr = SynExpr.LongIdent(false, LongIdentWithDots (newIdent :: (longId |> List.tail), m), None, m.[0]) // Range is probably wrong
-        let body = List.fold appendDelayedItem initialExpr delayed
-        let lambdaVarRange = initialId.idRange
-        let pats = SynSimplePats.SimplePats([SynSimplePat.Id (newIdent, None, true, true, false, lambdaVarRange)], lambdaVarRange)
-        let newExpr = SynExpr.Lambda(false, false, pats, body, m.[0] (*Really wrong*))
-        TcExpr cenv overallTy env tpenv newExpr
+        let body, _remaining = constructLambda initialExpr delayed
+        TcExpr cenv overallTy env tpenv (appendDelayedItem2 body _remaining)
     else
 
     let ad = env.eAccessRights

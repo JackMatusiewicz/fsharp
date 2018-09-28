@@ -48,6 +48,8 @@ open Microsoft.FSharp.Compiler.TcGlobals
 #if !NO_EXTENSIONTYPING
 open Microsoft.FSharp.Compiler.ExtensionTyping
 open Microsoft.FSharp.Core.CompilerServices
+open FSComp
+
 #endif
 
 #if FX_RESHAPED_REFLECTION
@@ -233,6 +235,7 @@ let GetRangeOfDiagnostic(err:PhasedDiagnostic) =
 #if !NO_EXTENSIONTYPING
       | :? TypeProviderError as e -> e.Range |> Some
 #endif
+      | InvalidUseOfUnderscore m -> Some m
       
       | _ -> None
   
@@ -354,6 +357,7 @@ let GetDiagnosticNumber(err:PhasedDiagnostic) =
       | ExtensionTyping.ProvidedTypeResolution _ -> 103
 #endif
       | PatternMatchCompilation.EnumMatchIncomplete _ -> 104
+      | InvalidUseOfUnderscore _ -> 105
        (* DO NOT CHANGE THE NUMBERS *)
 
       // Strip TargetInvocationException wrappers
@@ -823,6 +827,10 @@ let OutputPhasedErrorR (os:StringBuilder) (err:PhasedDiagnostic) =
               os.Append(Duplicate1E().Format (DecompileOpName s)) |> ignore
           else 
               os.Append(Duplicate2E().Format k (DecompileOpName s)) |> ignore
+
+      | InvalidUseOfUnderscore _ ->
+          let errorText = FSComp.SR.invalidUseOfUnderscore ()
+          os.Append(errorText) |> ignore
 
       | UndefinedName(_, k, id, suggestionsF) ->
           os.Append(k (DecompileOpName id.idText)) |> ignore

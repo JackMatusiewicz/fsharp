@@ -300,6 +300,7 @@ type internal TcResolutions =
     /// Represents the empty set of resolutions 
     static member Empty : TcResolutions
 
+exception internal InvalidUseOfUnderscore of range
 
 [<Struct>]
 type TcSymbolUseData = 

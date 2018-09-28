@@ -1,8 +1,8 @@
-type X = { x : int }
+type X = { x : int -> int -> int }
 
-let y = { x = 5 }
+let y = { x = (+) }
 
 /// BREAK
-
-5
-|> (fun _ -> _ + 99)
+y
+|> fun n -> n.x 20 99
+|> printfn "%d"

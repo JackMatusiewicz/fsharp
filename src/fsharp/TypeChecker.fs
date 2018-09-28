@@ -8518,7 +8518,11 @@ and TcLongIdentThen cenv overallTy env tpenv (LongIdentWithDots(longId, m)) dela
     if initialId.idText = MangledUnderscoreName && longId.Length > 1 then
         let newIdent : Ident = Ident("`lambdaVar`", initialId.idRange)
         let appendDelayedItem (acc : SynExpr) = function
-            | DelayedItem.DelayedApp(atomic, expr, m) -> SynExpr.App(atomic, false, acc, expr, m)
+            | DelayedItem.DelayedApp(atomic, expr, m) ->
+                if atomic = ExprAtomicFlag.Atomic then
+                    SynExpr.App(atomic, false, acc, expr, m)
+                else
+                    failwith ""
             | DelayedItem.DelayedDot -> SynExpr.DiscardAfterMissingQualificationAfterDot(acc, m.[0]) // Range definitely wrong
             | DelayedItem.DelayedDotLookup(ids, m) ->
                 let ms = ids |> List.map (fun o -> o.idRange)

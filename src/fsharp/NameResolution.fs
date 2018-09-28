@@ -2377,7 +2377,7 @@ let ChooseTyconRefInExpr (ncenv:NameResolver, m, ad, nenv, id:Ident, typeNameRes
         success (tys |> List.map (fun (resInfo,ty) -> (resInfo,Item.Types(id.idText,[ty]),[])))
 
         
-exception InvalidUseOfUnderscore of (unit -> int * string) * range
+exception InvalidUseOfUnderscore of range
 
 /// Resolve F# "A.B.C" syntax in expressions
 /// Not all of the sequence will necessarily be swallowed, i.e. we return some identifiers 
@@ -2447,9 +2447,9 @@ let rec ResolveExprLongIdentPrim sink (ncenv:NameResolver) first fullyQualified 
                             match !typeError with
                             | Some e -> raze e
                             | _ ->
-                                //if id.idText = MangledUnderscoreName then
-                                //    raze (InvalidUseOfUnderscore(FSComp.SR.invalidUseOfUnderscore, m))
-                                //else
+                                if id.idText = MangledUnderscoreName then
+                                    raze (InvalidUseOfUnderscore(m))
+                                else
                                 let suggestNamesAndTypes() =
                                     let suggestedNames =
                                         nenv.eUnqualifiedItems

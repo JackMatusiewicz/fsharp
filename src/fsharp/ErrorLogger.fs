@@ -444,7 +444,9 @@ let PushErrorLoggerPhaseUntilUnwind(errorLoggerTransformer : ErrorLogger -> #Err
     let newInstalled = ref true
     let newIsInstalled() = if !newInstalled then () else (assert false; (); (*failwith "error logger used after unwind"*)) // REVIEW: ok to throw?
     let chkErrorLogger = { new ErrorLogger("PushErrorLoggerPhaseUntilUnwind") with
-                             member __.DiagnosticSink(phasedError, isError) = newIsInstalled(); newErrorLogger.DiagnosticSink(phasedError, isError)
+                             member __.DiagnosticSink(phasedError, isError) =
+                                newIsInstalled();
+                                newErrorLogger.DiagnosticSink(phasedError, isError)
                              member __.ErrorCount = newIsInstalled(); newErrorLogger.ErrorCount }
 
     CompileThreadStatic.ErrorLogger <- chkErrorLogger

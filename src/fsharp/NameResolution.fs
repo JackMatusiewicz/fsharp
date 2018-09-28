@@ -2376,6 +2376,9 @@ let ChooseTyconRefInExpr (ncenv:NameResolver, m, ad, nenv, id:Ident, typeNameRes
         let tys = tcrefs |> List.map (fun (resInfo,tcref) -> (resInfo,FreshenTycon ncenv m tcref)) 
         success (tys |> List.map (fun (resInfo,ty) -> (resInfo,Item.Types(id.idText,[ty]),[])))
 
+        
+exception InvalidUseOfUnderscore of (unit -> int * string) * range
+
 /// Resolve F# "A.B.C" syntax in expressions
 /// Not all of the sequence will necessarily be swallowed, i.e. we return some identifiers 
 /// that may represent further actions, e.g. further lookups.
@@ -2444,6 +2447,9 @@ let rec ResolveExprLongIdentPrim sink (ncenv:NameResolver) first fullyQualified 
                             match !typeError with
                             | Some e -> raze e
                             | _ ->
+                                //if id.idText = MangledUnderscoreName then
+                                //    raze (InvalidUseOfUnderscore(FSComp.SR.invalidUseOfUnderscore, m))
+                                //else
                                 let suggestNamesAndTypes() =
                                     let suggestedNames =
                                         nenv.eUnqualifiedItems

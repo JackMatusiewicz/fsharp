@@ -4,6 +4,5 @@ let y = { x = 5 }
 
 /// BREAK
 
-y
-|> _.x.ToString().ToString()
-|> printfn "%s"
+5
+|> (fun _ -> _ + 99)
